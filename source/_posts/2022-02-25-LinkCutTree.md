@@ -77,7 +77,7 @@ void access(int x) {
 void makeroot(int x) {
 	access(x);
 	splay(x);
-	push_rev(x);
+	push_rev(x); // 反转两个儿子
 }
 void opter(int x, int y) {
 	makeroot(x);
@@ -87,3 +87,133 @@ void opter(int x, int y) {
 ```
 ### $\mathcal{Link}$
 回到本职操作。   
+链接两个点，实际上是把两棵树拼到一起，首先把其中一个点旋到根，这个时候处于根的点可以随便搞，直接把 `fa` 指针指到另一个节点即可。
+
+```cpp
+void link(int x, int y) {
+	makeroot(x);
+	if (findroot(y) == x) return; // 不对同连通块里的两点加边
+	s[x].fa = y;
+}
+```
+
+### $\mathcal{Cut}$
+很(**h&emacr;i**)清晰，先把一个点旋到根，把另外一点的父节点置空，把当前节点的右儿子置空。
+
+```cpp
+void cut(int x, int y) {
+	makeroot(x);
+	if (findroot(y) != x || s[y].ch[0] || s[y].fa != x) return; // 判 <x,y> 是否存在
+	s[y].fa = 0, s[x].ch[1] = 0;
+	push_up(x);
+}
+```
+
+---
+
+### $\mathcal{Changes \ about \ Splay}$
+
+突然发现 `Splay` 部分忘了写了。。。   
+
+观察可知，当 `makeroot` 之后父子关系、深度会发生变化，以前的 `Splay` 并不适用了，这个时候应该把 `Splay` 以 `newroot` 为根反转过来。   
+
+```cpp
+void push_rev(int p) { s[p].rev ^= 1, swap(s[p].ch[0], s[p].ch[1]); }
+void push_down(int p) {
+	if (!s[p].rev) return;
+	push_rev(s[p].ch[0]), push_rev(s[p].ch[1]);
+	s[p].rev = 0;
+}
+
+bool check(int x) { return ((s[s[x].fa].ch[0] != x) && (s[s[x].fa].ch[1] != x)); }
+void push_all(int x) {
+	if (!check(x)) push_all(s[x].fa);
+	push_down(x);
+}
+void splay(int x) {
+	push_all(x);
+	while (!check(x)) {
+		int y = s[x].fa, z = s[y].fa;
+		if (!check(y)) rotate((ident(x) == ident(y)) ? y : x);
+		rotate(x);
+	}
+	push_up(x);
+}
+
+```
+
+## $\mathcal{Code}$
+
+以 [「NOI2014」魔法森林](https://www.luogu.com.cn/problem/P2387) 中维护联通块内最大边权及其编号的代码为例。
+
+<details class="code">
+<summary>LinkCutTree.cpp</summary>
+
+```cpp
+struct LinkCutTree {
+	struct Splay { int fa, ch[2], dat, ind, val; bool rev; } s[MAXN];
+	void push_up(int p) {
+		s[p].dat = max(s[s[p].ch[0]].dat, max(s[p].val, s[s[p].ch[1]].dat));
+		if (s[s[p].ch[0]].dat == s[p].dat) {
+			s[p].ind = s[s[p].ch[0]].ind;
+		} else if (s[s[p].ch[1]].dat == s[p].dat) {
+			s[p].ind = s[s[p].ch[1]].ind;
+		} else s[p].ind = p;
+	}
+	void push_rev(int p) { s[p].rev ^= 1, swap(s[p].ch[0], s[p].ch[1]); }
+	void push_down(int p) {
+		if (!s[p].rev) return;
+		push_rev(s[p].ch[0]), push_rev(s[p].ch[1]);
+		s[p].rev = 0;
+	}
+	bool check(int x) { return ((s[s[x].fa].ch[0] != x) && (s[s[x].fa].ch[1] != x)); }
+	int ident(int x) { return x == s[s[x].fa].ch[1]; }
+	void connect (int f, int p, int k) { s[f].ch[k] = p, s[p].fa = f; }
+	void rotate (int x) {
+		int y = s[x].fa, z = s[y].fa, k = ident (x), k2 = ident (y);
+		if (!check(y)) s[z].ch[k2] = x;
+		s[x].fa = z;
+		connect(y, s[x].ch[k ^ 1], k);
+		connect(x, y, k ^ 1);
+		push_up (y), push_up (x);
+	}
+	void push_all(int x) {
+		if (!check(x)) push_all(s[x].fa);
+		push_down(x);
+	}
+	void splay(int x) {
+		push_all(x);
+		while (!check(x)) {
+			int y = s[x].fa, z = s[y].fa;
+			if (!check(y)) rotate((ident(x) == ident(y)) ? y : x);
+			rotate(x);
+		}
+		push_up(x);
+	}
+	void access(int x) { for (int i = 0; x; i = x, x = s[x].fa) splay(x), s[x].ch[1] = i, push_up(x); }
+	void makeroot(int x) { access(x), splay(x), push_rev(x); }
+	int findroot(int x) {
+		access(x), splay(x), push_down(x);
+		while (s[x].ch[0]) x = s[x].ch[0], push_down(x);
+		splay(x);
+		return x;
+	}
+	void opter(int x, int y) {
+		makeroot(x), access(y), splay(y);
+	}
+	void link(int x, int y) {
+		makeroot(x);
+		if (findroot(y) == x) return;
+		s[x].fa = y;
+	}
+	void cut(int x, int y) {
+		makeroot(x);
+		if (findroot(y) != x || s[y].ch[0] || s[y].fa != x) return;
+		s[y].fa = 0, s[x].ch[1] = 0;
+		push_up(x);
+	}
+} lct;
+
+```
+
+</details>
