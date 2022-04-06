@@ -99,7 +99,7 @@ void link(int x, int y) {
 ```
 
 ### $\mathcal{Cut}$
-很(**h&emacr;i**)清晰，先把一个点旋到根，把另外一点的父节点置空，把当前节点的右儿子置空。
+很(h&emacr;i)清晰，先把一个点旋到根，把另外一点的父节点置空，把当前节点的右儿子置空。
 
 ```cpp
 void cut(int x, int y) {
