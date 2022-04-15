@@ -140,7 +140,7 @@ sidebar:
 # Sidebar Avatar
 avatar:
   # Replace the default image and set the url here.
-  url: https://chenjg41.gitee.io/assets/images/avatar.gif
+  url: https://cdn.luogu.com.cn/upload/usericon/242572.png
   # If true, the avatar will be displayed in circle.
   rounded: true
   # If true, the avatar will be rotated with the cursor.
