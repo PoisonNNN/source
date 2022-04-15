@@ -42,7 +42,12 @@ tags: [题解, DP, 数位DP]
       就只能继续转移到 $p=1$ 上。
 
    综上，转移为：
-   $$ \begin{cases} dp[i][0][1]+=dp[i-1][j][0]& q = 0 \\ dp[i][q][0]+=dp[i-1][j][0] & q\neq0 \\ \end{cases}$$
+   $$ 
+   \begin{cases} 
+   dp[i][0][1]+=dp[i-1][j][0] & q = 0 \\ 
+   dp[i][q][0]+=dp[i-1][j][0] & q\neq0 \\ 
+   \end{cases}
+   $$
 
 在 DP 前我们可以预处理出 $10^{i-1}$ ($1<= i <= n$) 模  $k$ 的余数，方便于计算 $q$ 。
 
