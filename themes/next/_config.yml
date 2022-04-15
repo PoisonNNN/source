@@ -898,3 +898,7 @@ vendors:
 css: css
 js: js
 images: images
+
+# %%%CJG
+sakura:
+  enable: true
