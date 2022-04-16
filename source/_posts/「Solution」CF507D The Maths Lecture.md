@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "「Solution」CF507D The Maths Lecture"
-date: 2021-01-09
+date: 2021-01-10
 tags: [题解, DP, 数位DP]
 ---
 
